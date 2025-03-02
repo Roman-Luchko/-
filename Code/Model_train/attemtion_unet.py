@@ -1,26 +1,64 @@
 import torch
-import torch.nn as nn
+import torch.nn as nn # готовые слои для нейросетей.
 
 
 class ConvBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels):
-        super(ConvBlock, self).__init__()
+        # in_channels : входное количество матриц
+        # out_channels : выходное количество матриц
 
-        # number of input channels is a number of filters in the previous layer
-        # number of output channels is a number of filters in the current layer
-        # "same" convolutions
+        super(ConvBlock, self).__init__()
+        #Если ты не вызовешь super().__init__(), PyTorch не сможет отслеживать
+        # параметры модели, и она не будет работать.
+
+
+        # nn.Sequential(...) позволяет объединить слои в один модуль,
+        # чтобы потом вызвать их одним вызовом (без явного указания каждого слоя).
         self.conv = nn.Sequential(
+
+            # 1 Первый слой
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True),
+            # Conv2d : Сверточный слой
+            # in_channels : вход
+            # out_channels : выход
+            # kernel_size : равномерность nxn фильтра
+            # stride : шаг фильтра
+            # padding : добавляет по краям 1 слой пикселей, для избежани ошибки с
+            # с фильтром
+            # bias=True : добавляет обучаемый параметр смещения
+
+            # Batch Normalization - метод нормализации
+            # Нормализация служит для ускорения обучения
+
             nn.BatchNorm2d(out_channels),
+            # BatchNorm2d нормализует каждый канал отдельно,
+            # поэтому он должен знать, сколько их будет
+
+            # функция актвации ReLu
             nn.ReLU(inplace=True),
+            # inplace=False (по умолчанию) — создаёт новый тензор с
+            # результатами преобразования.
+            # inplace=True — изменяет входной тензор на месте, без создания копии.
+
+            # Когда использовать inplace=True?
+            # - Экономит память (нет лишнего выделения).
+            # - Иногда ускоряет вычисления.
+            # - Нельзя использовать, если слой стоит до слоёв, которым нужен оригинальный тензор
+            #   (например, в некоторых сложных графах вычислений).
+
+            # 2 Слой, не обьясняю, выше в коде похожий словй
             nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         )
 
+    # прямое распространение (forward pass)(или максимально по простому
+    # слева->направо по схеме нейронки
     def forward(self, x):
         x = self.conv(x)
+        # conv : есть уже в коде, при вызове conv все что вложено
+        # с помощью nn.Sequential, поочередно используеться
         return x
 
 
@@ -31,6 +69,8 @@ class UpConv(nn.Module):
 
         self.up = nn.Sequential(
             nn.Upsample(scale_factor=2),
+            # nn.Upsample(scale_factor=2) – увеличивает размер входного тензора
+            # в 2 раза.
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)

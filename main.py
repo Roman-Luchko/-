@@ -144,6 +144,7 @@ def train(): # тренировка самой модели
 
 
 def plot_prediction(model, dataloaders):
+    # мне тут лень понимать, пока єто не важно
     if 'val' not in dataloaders or len(dataloaders['val'].dataset) == 0:
         print("Ошибка: валидационный датасет пустой!")
         return
