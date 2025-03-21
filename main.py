@@ -43,7 +43,7 @@ class DicomDataset(Dataset):
         mask = mask.convert("L")  # Преобразуем в черно-белое изображение
 
         image = torch.tensor(image, dtype=torch.float32).unsqueeze(0)  # Добавляем канал (C, H, W)
-        mask = torch.tensor(np.array(mask), dtype=torch.float32).unsqueeze(0)  # Тоже добавляем канал для маски
+        mask = torch.tensor(np.array(mask) / 255.0, dtype=torch.float32).unsqueeze(0)  # Тоже добавляем канал для маски
 
         # Генерируем имя для предсказания, например, используя имя изображения с добавлением префикса или суффикса
         predicted_filename = self.dicom_files[idx]# Это пример, замените на нужный формат
@@ -94,7 +94,7 @@ def train_model():
 
     # Создаем модель
     model = AttentionUNet(1, 1)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-6)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     criterion = DiceLoss()
 
     # Запуск тренировки

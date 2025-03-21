@@ -10,6 +10,7 @@ def train(model, dataloaders, optimizer, criterion, num_epochs=3, show_images=Fa
     # Use GPU if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    print(f"device is {device}")
 
     for epoch in range(1, num_epochs + 1):
 
